@@ -40,6 +40,21 @@ cord_plan.plot_sgl_car_cost(park, j_vi)
 
 cord_plan.plot_sgl_car_cost(park, j_vi_1)
 
+path = cord_car.car_path_gidx(2, u_vi, park)
+print(path)
+
+path_mod = cord_car.car_path_gidx_len(path, path.size + 1)
+print(path_mod)
+
+paths = np.zeros((3, path_mod.size))
+for i in range(3):
+    paths[i,:] = path_mod.T
+
+print(paths)
+print(cord_car.car_rollout_sim(paths))
+
+
+
 #print(False in (j_vi == j_vi_al))
 
 

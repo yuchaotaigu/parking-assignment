@@ -101,7 +101,8 @@ def car_rollout_sim(paths):
         positions = paths[:,i]
         pos, count = np.unique(positions, return_counts=True)
         duplication = pos[count > 1]
-        break if duplication.size > 0
+        if duplication.size > 0:
+            break
 
     if duplication.size == 0:
         return False
