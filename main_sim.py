@@ -39,9 +39,21 @@ j_bar_1[pk_g_idx[0]] = np.int(0.8*sys.maxsize)
 u_vi, j_vi, id= cord_plan.value_iteration(p,g,j_bar_1)
 
 shortest_p_c = cord_plan.shortest_path_control(p,g,park)
+car_gidx = cord_car.input_cars_init_gidx(park)
 
-check_result = np.prod(shortest_p_c[pk_g_idx[0]][1]==j_vi)
-print(shortest_p_c[pk_g_idx[0]][1]==j_vi)
+b_w = cord_plan.cord_bipartite_weights(car_gidx, shortest_p_c, park)
+
+print(b_w)
+start = time.time()
+j_tilde = cord_plan.cord_bp_rollout_cost(b_w, car_gidx, shortest_p_c, park)
+print(j_tilde)
+
+end = time.time()
+print(end - start)
+
+
+#check_result = np.prod(shortest_p_c[pk_g_idx[0]][1]==j_vi)
+#print(shortest_p_c[pk_g_idx[0]][1]==j_vi)
 """
 start = time.time()
 u_vi, j_vi, id= cord_plan.value_iteration(p,g,j_bar)

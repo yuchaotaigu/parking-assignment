@@ -4,10 +4,15 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.optimize import linear_sum_assignment as bp_assign
+from lapsolver import solve_dense as bp_assign_dense
+
 from itertools import permutations as perm
 
+
+
 try:
-    import cord_park
+    import cord_park, cord_car
 except ImportError:
     raise
 
@@ -229,7 +234,16 @@ def value_iteration(p, g, j_bar):
 
 def shortest_path_control(p, g, park):
     """
-    
+    Compute the shortest paths and optimal controls to each spot from the grid
+
+    Inputs:
+    'p': transition matrix, array
+    'g': one stage cost, array
+    'park': instance of park class
+
+    Ouput:
+    'shortest_p_c': dictionary with key as aimed parking spot, and entries as
+        a tuple (u, j) computed by value iteration
     """
     pk_num = park.pk_num
     pk_g_idx = park.pk_g_idx
@@ -237,7 +251,9 @@ def shortest_path_control(p, g, park):
     shortest_p_c = {}
     for i in range(pk_num):
         j_bar = np.zeros(p.shape[0])
-        j_bar[pk_g_idx[i]] = fake_infinity
+        for j in range(pk_num):
+            if j != i:
+                j_bar[pk_g_idx[j]] = fake_infinity
         u_vi, j_vi, _ = value_iteration(p,g,j_bar)
         shortest_p_c[pk_g_idx[i]] = (u_vi, j_vi)
 
@@ -245,7 +261,58 @@ def shortest_path_control(p, g, park):
 
 
 
-#def cord_bipartite_weights
+def cord_bipartite_weights(car_gidx, shortest_p_c, park):
+    """
+
+    """
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+    car_num = car_gidx.size
+
+    bipartite_w = np.zeros((car_num, pk_num))
+    for i_c in range(car_num):
+        for i_p in range(pk_num):
+            g_c = car_gidx[i_c]
+            g_p = pk_g_idx[i_p]
+            bipartite_w[i_c][i_p] = shortest_p_c[g_p][1][g_c]
+    return bipartite_w
+
+def cord_bp_rollout_cost(bipartite_w, car_gidx, shortest_p_c, park):
+    """
+
+    """
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+    car_num = car_gidx.size
+
+    #row_i, col_i = bp_assign(bipartite_w)
+    row_i, col_i = bp_assign_dense(bipartite_w)
+    bp_cost = bipartite_w[row_i, col_i].sum()
+    print(col_i)
+    path_dic = {}
+
+    for i_c in range(car_num):
+        path = cord_car.car_path_gidx(car_gidx[i_c], shortest_p_c[pk_g_idx[col_i[i_c]]][0], park)
+        path_dic[i_c] = path
+
+    max_len = np.int(0)
+    for j_c in range(car_num):
+        if max_len < path_dic[j_c].size:
+            max_len = path_dic[j_c].size
+
+    paths = np.zeros((car_num, max_len))
+    for k_c in range(car_num):
+        paths[k_c, :] = cord_car.car_path_gidx_len(path_dic[k_c], max_len).T
+
+    print(paths)
+    rollout_cost = g_coupled(cord_car.car_rollout_sim(paths))
+
+    j_tilde = bp_cost + rollout_cost
+    return j_tilde
+
+
+
+
 
 
 def priority_assign_perm(car_dim):
