@@ -333,6 +333,9 @@ def cord_multiagent_rollout(car_gidx, shortest_p_c, park):
     for i_c in range(car_num):
         for i_u in range(u_dim):
             #print(i_c)
+            """
+            USE p and g INSTEAD to get the dynamics and cost!!!!!!!!!!!!!!
+            """
             car_xy = cord_park.xycrd_frm_gidx(car_next_gidx[i_c],xy_dim)+\
                 cord_park.xyu_frm_u(i_u)
             #print(car_xy)
