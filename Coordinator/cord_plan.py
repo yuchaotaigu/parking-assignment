@@ -288,7 +288,7 @@ def cord_bp_rollout_cost(bipartite_w, car_gidx, shortest_p_c, park):
     #row_i, col_i = bp_assign(bipartite_w)
     row_i, col_i = bp_assign_dense(bipartite_w)
     bp_cost = bipartite_w[row_i, col_i].sum()
-    print(col_i)
+    #print(col_i)
     path_dic = {}
 
     for i_c in range(car_num):
@@ -304,14 +304,67 @@ def cord_bp_rollout_cost(bipartite_w, car_gidx, shortest_p_c, park):
     for k_c in range(car_num):
         paths[k_c, :] = cord_car.car_path_gidx_len(path_dic[k_c], max_len).T
 
-    print(paths)
+    #print(paths)
     rollout_cost = g_coupled(cord_car.car_rollout_sim(paths))
 
     j_tilde = bp_cost + rollout_cost
     return j_tilde
 
 
+def cord_multiagent_rollout(car_gidx, shortest_p_c, park):
+    """
 
+    """
+    g_dim = park.g_dim
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+    xy_dim = park.xy_dim
+    car_num = car_gidx.size
+    #print(car_num)
+    u_dim = 5
+    g_per_stage = car_num
+
+    car_next_gidx = car_gidx
+    car_inter_gidx = car_gidx
+    u_star =  np.zeros(car_num, dtype = int)
+    j_inter = np.zeros(u_dim)
+    car_inter = np.zeros(u_dim)
+    wall_flag = False
+    for i_c in range(car_num):
+        for i_u in range(u_dim):
+            #print(i_c)
+            car_xy = cord_park.xycrd_frm_gidx(car_next_gidx[i_c],xy_dim)+\
+                cord_park.xyu_frm_u(i_u)
+            #print(car_xy)
+            if (car_xy[0] not in range(1, xy_dim[0]+1)) or\
+                (car_xy[1] not in range(1, xy_dim[1]+1)):
+                car_inter_gidx[i_c] = car_next_gidx[i_c]
+                wall_flag = True
+            else:
+                car_inter_gidx[i_c] = cord_park.gidx_frm_xycrd(car_xy ,xy_dim)
+
+            car_inter[i_u] = car_inter_gidx[i_c]
+            #print(car_inter_gidx[i_c])
+            if (car_inter_gidx.size == np.unique(car_inter_gidx).size) and \
+                (not wall_flag):
+                b_w = cord_bipartite_weights(car_inter_gidx, shortest_p_c, park)
+                j_inter[i_u] =  g_per_stage + \
+                    cord_bp_rollout_cost(b_w, car_inter_gidx, shortest_p_c, park)
+            else:
+                j_inter[i_u] = np.Inf
+            wall_flag = False
+
+            #print(j_inter[i_u])
+            #print(i_u)
+        u_star[i_c] = j_inter.argmin()
+        car_next_gidx[i_c] = car_inter[u_star[i_c]]
+        car_inter_gidx = car_next_gidx
+    b_w = cord_bipartite_weights(car_next_gidx, shortest_p_c, park)
+    j = g_per_stage + cord_bp_rollout_cost(b_w, car_next_gidx, shortest_p_c, park)
+    b_w = cord_bipartite_weights(car_gidx, shortest_p_c, park)
+    j_delta = cord_bp_rollout_cost(b_w, car_gidx, shortest_p_c, park) + g_per_stage - j
+
+    return j_delta, j, u_star
 
 
 

@@ -24,34 +24,42 @@ g_dim = cord_park.gdim_frm_xydim(xy_dim)
 pk_g_idx = cord_park.input_pkgidx(g_dim)
 print(pk_g_idx)
 
-v_target = cord_park.input_target_speed()
+#v_target = cord_park.input_target_speed()
+v_target = 10
 
 park = cord_park.Park(g_dim, xy_dim, pk_g_idx,v_target)
 
 p = cord_plan.p_single_car(park)
 
 g = cord_plan.g_single_car(park)
-
+"""
 j_bar = np.zeros(p.shape[0])
 j_bar_1 = np.zeros(p.shape[0])
 j_bar_1[pk_g_idx[0]] = np.int(0.8*sys.maxsize)
 
 u_vi, j_vi, id= cord_plan.value_iteration(p,g,j_bar_1)
-
+"""
 shortest_p_c = cord_plan.shortest_path_control(p,g,park)
 car_gidx = cord_car.input_cars_init_gidx(park)
 
-b_w = cord_plan.cord_bipartite_weights(car_gidx, shortest_p_c, park)
-
+#b_w = cord_plan.cord_bipartite_weights(car_gidx, shortest_p_c, park)
+"""
 print(b_w)
 start = time.time()
+b_w = cord_plan.cord_bipartite_weights(car_gidx, shortest_p_c, park)
 j_tilde = cord_plan.cord_bp_rollout_cost(b_w, car_gidx, shortest_p_c, park)
 print(j_tilde)
 
 end = time.time()
 print(end - start)
-
-
+"""
+start = time.time()
+j_delta, j, u_star = cord_plan.cord_multiagent_rollout(car_gidx, shortest_p_c, park)
+print(j_delta)
+print(j)
+print(u_star)
+end = time.time()
+print(end - start)
 #check_result = np.prod(shortest_p_c[pk_g_idx[0]][1]==j_vi)
 #print(shortest_p_c[pk_g_idx[0]][1]==j_vi)
 """
