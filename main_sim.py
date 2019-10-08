@@ -1,10 +1,13 @@
 import math
 import sys
+import time
 
 import matplotlib.pyplot as plt
 import matplotlib.axes as axes
 import numpy as np
 import scipy.linalg as la
+
+
 
 sys.path.append("Vehicle/")
 sys.path.append("Coordinator/")
@@ -33,9 +36,20 @@ j_bar = np.zeros(p.shape[0])
 j_bar_1 = np.zeros(p.shape[0])
 j_bar_1[pk_g_idx[0]] = np.int(0.8*sys.maxsize)
 
+u_vi, j_vi, id= cord_plan.value_iteration(p,g,j_bar_1)
 
+shortest_p_c = cord_plan.shortest_path_control(p,g,park)
+
+check_result = np.prod(shortest_p_c[pk_g_idx[0]][1]==j_vi)
+print(shortest_p_c[pk_g_idx[0]][1]==j_vi)
+"""
+start = time.time()
 u_vi, j_vi, id= cord_plan.value_iteration(p,g,j_bar)
-u_vi_1, j_vi_1, id_1= cord_plan.value_iteration(p,g,j_bar_1)
+end = time.time()
+print(end - start)
+"""
+#u_vi_1, j_vi_1, id_1= cord_plan.value_iteration(p,g,j_bar_1)
+"""
 cord_plan.plot_sgl_car_cost(park, j_vi)
 
 cord_plan.plot_sgl_car_cost(park, j_vi_1)
@@ -53,7 +67,7 @@ for i in range(3):
 print(paths)
 print(cord_car.car_rollout_sim(paths))
 
-
+"""
 
 #print(False in (j_vi == j_vi_al))
 

@@ -4,6 +4,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+from itertools import permutations as perm
+
 try:
     import cord_park
 except ImportError:
@@ -225,8 +227,39 @@ def value_iteration(p, g, j_bar):
         vi_real_it = 1000-idx0_vi+2
     return u_vi[:,idx0_vi], j_vi[:,idx0_vi], vi_real_it
 
+def shortest_path_control(p, g, park):
+    """
+    
+    """
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+
+    shortest_p_c = {}
+    for i in range(pk_num):
+        j_bar = np.zeros(p.shape[0])
+        j_bar[pk_g_idx[i]] = fake_infinity
+        u_vi, j_vi, _ = value_iteration(p,g,j_bar)
+        shortest_p_c[pk_g_idx[i]] = (u_vi, j_vi)
+
+    return shortest_p_c
 
 
+
+#def cord_bipartite_weights
+
+
+def priority_assign_perm(car_dim):
+    """
+    Compute all priority oders given the number of cars
+
+    Input:
+    'car_dim': the number of cars
+    Output:
+    'priority_list': a list of all variants of permutations of priority
+    """
+    priority_list = perm(range(car_dim))
+
+    return priority_list
 
 
 
