@@ -108,3 +108,65 @@ def car_rollout_sim(paths):
         return False
     else:
         return True
+
+def car_xycrd_from_path(path, park, max_len = 7):
+    """
+    Return the x cords and y cords of the access-granted grid within the length of max_len
+
+    Inputs:
+    'path': array of optimal path in terms of grid index
+    'park': instance of class Park
+    'max_len': maximum length of the point cords
+
+    Output:
+    'x_cords': a list of x cords
+    'y_cords': a list of y cords
+    """
+    xy_dim = park.xy_dim
+    g_dim = park.g_dim
+
+    unit_size = park.unit_size
+
+    pth_dim = path.shape[0]
+    x_cords = []
+    y_cords = []
+
+    g_pth_idx = []
+
+    if pth_dim <= max_len:
+        for idx in range(pth_dim):
+            xy_cords = cord_park.xycrd_frm_gidx(path[idx],xy_dim)
+            x_cords.append(unit_size*xy_cords[0]-unit_size/2)
+            y_cords.append(unit_size*xy_cords[1]-unit_size/2)
+
+    else:
+        xy_cords = cord_park.xycrd_frm_gidx(path[0],xy_dim)
+        x_cords.append(unit_size*xy_cords[0]-unit_size/2)
+        y_cords.append(unit_size*xy_cords[1]-unit_size/2)
+        width = (pth_dim-2) // (max_len-2)
+        for idx in [i * width for i in range(1,max_len-1)]:
+            xy_cords = cord_park.xycrd_frm_gidx(path[idx],xy_dim)
+            x_cords.append(unit_size*xy_cords[0]-unit_size/2)
+            y_cords.append(unit_size*xy_cords[1]-unit_size/2)
+
+        xy_cords = cord_park.xycrd_frm_gidx(path[-1],xy_dim)
+        x_cords.append(unit_size*xy_cords[0]-unit_size/2)
+        y_cords.append(unit_size*xy_cords[1]-unit_size/2)
+
+    return x_cords, y_cords
+
+def cars_xycords_from_path(paths, park):
+    """
+
+    """
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+    car_num = len(paths)
+
+    cars_xy_cords = {}
+    for i_c in range(car_num):
+        x_cords, y_cords = car_xycrd_from_path(paths[i_c], \
+            park, max_len = 7)
+        cars_xy_cords[i_c] = (x_cords, y_cords)
+
+    return cars_xy_cords

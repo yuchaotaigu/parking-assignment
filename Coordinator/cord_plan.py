@@ -287,8 +287,8 @@ def cord_bp_rollout_cost(bipartite_w, car_gidx, shortest_p_c, park):
     pk_g_idx = park.pk_g_idx
     car_num = car_gidx.size
 
-    row_i, col_i = bp_assign(bipartite_w)
-    #row_i, col_i = bp_assign_dense(bipartite_w)
+    #row_i, col_i = bp_assign(bipartite_w)
+    row_i, col_i = bp_assign_dense(bipartite_w)
     bp_cost = bipartite_w[row_i, col_i].sum()
     #print(col_i)
     path_dic = {}
@@ -311,7 +311,6 @@ def cord_bp_rollout_cost(bipartite_w, car_gidx, shortest_p_c, park):
 
     j_tilde = bp_cost + rollout_cost
     return j_tilde
-
 
 
 
@@ -338,7 +337,7 @@ def cord_multiagent_rollout(car_gidx, shortest_p_c, p_sgl_car, g_sgl_car, park):
     bip = cord_bp_rollout_cost(b_w_ini, car_gidx, shortest_p_c, park)
 
 
-    for i_c in range(car_num):
+    for i_c in range(car_num-1,-1,-1):
         car_inter_gidx = car_next_gidx
         car_ini_gidx = car_gidx[i_c]
         for i_u in range(u_dim):
@@ -368,6 +367,29 @@ def cord_multiagent_rollout(car_gidx, shortest_p_c, p_sgl_car, g_sgl_car, park):
 
 
     return j_delta, j, u_star
+
+
+
+
+def cord_pseudo_paths(car_gidx, shortest_p_c, park):
+    """
+
+    """
+    pk_num = park.pk_num
+    pk_g_idx = park.pk_g_idx
+    car_num = car_gidx.size
+
+    pk_assign_gidx = np.zeros(car_num, dtype = int)
+    b_w = cord_bipartite_weights(car_gidx, shortest_p_c, park)
+    _, pk_assign_num = bp_assign_dense(b_w)
+
+    paths = {}
+    for i_c in range(car_num):
+        pk_assign_gidx[i_c] = pk_g_idx[pk_assign_num[i_c]]
+        paths[i_c] = cord_car.car_path_gidx(car_gidx[i_c], \
+            shortest_p_c[pk_assign_gidx[i_c]][0], park)
+
+    return paths, pk_assign_gidx
 
 
 def priority_assign_perm(car_dim):
