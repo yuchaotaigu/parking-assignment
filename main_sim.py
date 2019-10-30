@@ -13,7 +13,7 @@ sys.path.append("Vehicle/")
 sys.path.append("Coordinator/")
 sys.path.append("Miscellaneous/")
 try:
-    import cord_park, cord_car, cord_plan, park_one
+    import cord_park, cord_car, cord_plan, vehicle_sim
 except ImportError:
     raise
 
@@ -25,9 +25,10 @@ pk_g_idx = cord_park.input_pkgidx(g_dim)
 print(pk_g_idx)
 
 #v_target = cord_park.input_target_speed()
-v_target = 10
-
-park = cord_park.Park(g_dim, xy_dim, pk_g_idx,v_target)
+v_target = 10.8
+#v_target = 10
+park = cord_park.Park(g_dim, xy_dim, pk_g_idx,v_target/3.6*3)
+#park = cord_park.Park(g_dim, xy_dim, pk_g_idx,v_target)
 
 p = cord_plan.p_single_car(park)
 
@@ -44,6 +45,9 @@ print(p_assign_num)
 paths, pk_assign_gidx = cord_plan.cord_pseudo_paths(car_gidx, shortest_p_c, park)
 cars_xy_cords = cord_car.cars_xycords_from_path(paths, park)
 
-print(cars_xy_cords[0])
-print(cars_xy_cords[1])
-print(cars_xy_cords[2])
+print(cars_xy_cords[0][0],cars_xy_cords[0][1])
+
+cars_states = vehicle_sim.cars_state_ini(cars_xy_cords)
+cars_plannars = vehicle_sim.cars_planners_setup(cars_xy_cords)
+
+vehicle_sim.vehicle_simulation(cars_xy_cords, park)
