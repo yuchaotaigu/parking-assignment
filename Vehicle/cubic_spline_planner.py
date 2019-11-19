@@ -194,8 +194,17 @@ def calc_spline_course(x, y, ds=0.1):
 def main():
     print("Spline 2D test")
     import matplotlib.pyplot as plt
-    x = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
-    y = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
+    #x = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
+    #y = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
+    radius = 10
+    d_theta = np.pi/14
+
+
+    x = [radius-radius*math.cos(idx*d_theta) for idx in range(8)]
+
+    y = [radius-radius*math.sin(idx*d_theta) for idx in range(8)]
+    #x.reverse()
+    #y.reverse()
     ds = 0.1  # [m] distance of each intepolated points
 
     sp = Spline2D(x, y)
@@ -208,6 +217,14 @@ def main():
         ry.append(iy)
         ryaw.append(sp.calc_yaw(i_s))
         rk.append(sp.calc_curvature(i_s))
+
+    print(ryaw[1:400:20])
+    print(rk[1:400:20])
+    print(rk[50] == 0.0)
+    print(type(rk))
+
+    #print(type(rx), type(s), len(s))
+    #print(math.sqrt(rx[430]**2+ry[430]**2)-math.sqrt(rx[429]**2+ry[429]**2))
 
     plt.subplots(1)
     plt.plot(x, y, "xb", label="input")

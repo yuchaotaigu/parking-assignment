@@ -12,10 +12,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as la
 
-#sys.path.append("../../PathPlanning/CubicSpline/")
+#sys.path.append("../Coordinator/")
 
 try:
-    import cubic_spline_planner
+    import cubic_spline_planner, lattice_based_planner
 except ImportError:
     raise
 
@@ -188,7 +188,7 @@ def do_simulation(cx, cy, cyaw, ck, speed_profile, goal):
     stop_speed = 0.05
 
     #state = State(x=-0.0, y=-0.0, yaw=0.0, v=10.0/3.6)
-    state = State(x=15.0, y=15.0, yaw=0.0, v=10.0/3.6)
+    state = State(x=0.0, y=0.0, yaw=0.0, v=0)
 
     time = 0.0
     x = [state.x]
@@ -326,13 +326,23 @@ def main():
     print("LQR steering control tracking start!!")
     #ax = [0.0, 6.0, 12.5, 10.0, 17.5, 20.0, 25.0]
     #ay = [0.0, -3.0, -5.0, 6.5, 3.0, 0.0, 0.0]
-    ax = [15.0, 11.0, 10.5, 6.0, 1.5, -10.0, -15.0]
-    ay = [15.0, 15.0, 12.0, 7.5, 3.0, 0.0, 0.0]
+    #ax = [15.0, 11.0, 10.5, 6.0, 1.5, -10.0, -15.0]
+    #ay = [15.0, 15.0, 12.0, 7.5, 3.0, 0.0, 0.0]
+    x_crds = np.array([-8, 1, 10, 19, 28.0, 28, 28, 28, 28])
+    y_crds = np.array([1.0, 1.0, 1.0, 1.0, 1, 10, 19, 28, 37])
+    u_path = np.array([-1, 2, 2, 2, 2, 3, 3, 3, 3, 0])
+
+    ax = list(x_crds)
+    ay = list(y_crds)
+
     goal = [ax[-1], ay[-1]]
 
     cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(
         ax, ay, ds=0.1)
-    target_speed = 10.0 / 3.6  # simulation parameter km/h -> m/s
+    primi = lattice_based_planner.Primitives(4.5, 0.1)
+    cx, cy, cyaw, ck = lattice_based_planner.calc_lattice_course(primi, x_crds, y_crds, u_path)
+
+    target_speed = 10.8 / 3.6  # simulation parameter km/h -> m/s
 
     sp = calc_speed_profile(cyaw, target_speed)
 

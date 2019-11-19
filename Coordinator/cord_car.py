@@ -65,6 +65,47 @@ def car_path_gidx(g_idx,u,park):
 
     return path
 
+
+
+def car_path_u_xy_crds(g_idx,u,park):
+    """
+    Find out the optimal path x y cords and controls given the current calc_position
+
+    Inputs:
+    'g_idx': current vehicle position in terms of grid idx
+    'u': optimal control obtained via value iterations
+    'park': instance of class Park
+
+    Output:
+    'x_crds': array of x_cords of optimal path, length equal to the path length
+    'y_crds': array of x_cords of optimal path, length equal to the path length
+    'u_path': array of optimal controls related to optimal path,
+        length equal to the path length plus one
+    """
+    xy_dim = park.xy_dim
+
+    g = g_idx
+
+    u_path = np.array([-1])
+    x_crds = np.array([])
+    y_crds = np.array([])
+    while g not in park.pk_g_idx:
+        xy_crd = cord_park.xycrd_frm_gidx(g,xy_dim)
+        x_crds = np.append(x_crds,xy_crd[0])
+        y_crds = np.append(y_crds,xy_crd[1])
+        u_path = np.append(u_path,u[g])
+        xy_crd = xy_crd + cord_park.xyu_frm_u(u[g])
+        g = cord_park.gidx_frm_xycrd(xy_crd,xy_dim)
+
+    xy_crd = cord_park.xycrd_frm_gidx(g,xy_dim)
+    x_crds = np.append(x_crds,xy_crd[0])
+    y_crds = np.append(y_crds,xy_crd[1])
+    u_path = np.append(u_path,0)
+
+    return x_crds, y_crds, u_path
+
+
+
 def car_path_gidx_len(path, length):
     """
     Contruct path with specific length
